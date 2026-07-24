@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 504 172" role="img" aria-labelledby="title desc">
+  <title id="title">ENEL BRASIL</title>
+  <desc id="desc">Espaço reservado para inserção da logomarca oficial autorizada.</desc>
+  <rect x="2" y="2" width="500" height="168" rx="31" fill="#fff" stroke="#d5deeb" stroke-width="4"/>
+  <rect x="20" y="22" width="86" height="86" rx="25" fill="#0878f9"/>
+  <circle cx="91" cy="91" r="31" fill="#ee0b6f"/>
+  <text x="142" y="69" fill="#15213f" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" letter-spacing="1">ENEL BRASIL</text>
+  <text x="142" y="106" fill="#64708a" font-family="Arial, Helvetica, sans-serif" font-size="18" letter-spacing=".4">INSIRA A LOGOMARCA OFICIAL</text>
+</svg>
