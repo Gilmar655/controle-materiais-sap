@@ -1513,18 +1513,9 @@
 
   async function loadInitialData() {
     $("#kpiGrid").innerHTML = Array.from({ length: 12 }, () => `<div class="skeleton"></div>`).join("");
-    let payload = null;
-    let usedFallback = false;
-    try {
-      const response = await fetch("data/base-inicial.json", { cache: "no-store" });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      payload = await response.json();
-    } catch (_error) {
-      payload = window.BASE_INICIAL_EMBUTIDA;
-      usedFallback = true;
-    }
+    const payload = window.BASE_INICIAL_EMBUTIDA;
     if (!payload?.records?.length) {
-      throw new Error("A base inicial e a contingência incorporada não contêm registros.");
+      throw new Error("A base inicial incorporada não contém registros.");
     }
     state.metadata = payload.metadata || {};
     state.allRecords = prepareRecords(payload.records);
@@ -1534,7 +1525,7 @@
     updateDashboard();
     toast(
       "Base inicial carregada",
-      `${formatInteger(state.allRecords.length)} registros disponíveis ${usedFallback ? "pela contingência local" : "a partir do JSON publicado"}.`,
+      `${formatInteger(state.allRecords.length)} registros disponíveis na carga publicada.`,
       "success"
     );
   }
