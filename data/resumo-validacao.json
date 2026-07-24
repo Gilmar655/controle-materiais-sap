@@ -1,0 +1,16 @@
+{
+  "totalRegistros": 3047,
+  "totalProjetos": 10,
+  "totalMateriais": 400,
+  "totalContratos": 2,
+  "totalMovimentos": 4,
+  "totalReservas": 10,
+  "quantidadeOrcada": 21804.892,
+  "quantidadeBaixada": 10942.374,
+  "saldoNaoBaixado": 10862.518,
+  "percentualBaixa": 50.183115,
+  "registrosSemContrato": 2990,
+  "quantidadesOrcadasNegativas": 960,
+  "quantidadesBaixadasNegativas": 175,
+  "registrosDuplicados": 0
+}
