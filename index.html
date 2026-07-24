@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Dashboard executivo para controle de materiais orçados e baixados no SAP.">
+  <meta name="theme-color" content="#0f172a">
+  <title>Controle de Materiais Orçados × Materiais Baixados — SAP</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="https://cdn.tailwindcss.com" onerror="this.remove()"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script>window.Chart||document.write('<script src="assets/vendor/chart.umd.min.js"><\/script>')</script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script>window.XLSX||document.write('<script src="assets/vendor/xlsx.full.min.js"><\/script>')</script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script>window.lucide||document.write('<script src="assets/vendor/lucide.min.js"><\/script>')</script>
+</head>
+<body>
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+  <div id="appShell" class="app-shell">
+    <aside id="sidebar" class="sidebar" aria-label="Navegação principal">
+      <div class="brand">
+        <div class="brand-logo-wrap">
+          <img src="assets/logo-enel.svg" alt="Espaço reservado para a logomarca oficial Enel Brasil" class="brand-logo">
+        </div>
+        <div>
+          <strong>MCPSE Analytics</strong>
+          <span>Engenharia e Materiais</span>
+        </div>
+        <button id="closeSidebar" class="icon-button sidebar-close" aria-label="Fechar menu"><i data-lucide="x"></i></button>
+      </div>
+
+      <nav id="sidebarNav" class="sidebar-nav">
+        <a class="nav-link active" href="#visao-geral"><i data-lucide="layout-dashboard"></i><span>Visão Geral</span></a>
+        <a class="nav-link" href="#projetos"><i data-lucide="folder-kanban"></i><span>Projetos</span></a>
+        <a class="nav-link" href="#materiais"><i data-lucide="package-search"></i><span>Materiais</span></a>
+        <a class="nav-link" href="#reservas"><i data-lucide="clipboard-list"></i><span>Reservas</span></a>
+        <a class="nav-link" href="#baixas"><i data-lucide="trending-up"></i><span>Baixas</span></a>
+        <a class="nav-link" href="#contratos"><i data-lucide="file-signature"></i><span>Contratos</span></a>
+        <a class="nav-link" href="#movimentos"><i data-lucide="git-compare-arrows"></i><span>Movimentos</span></a>
+        <a class="nav-link" href="#inconsistencias"><i data-lucide="triangle-alert"></i><span>Inconsistências</span></a>
+        <a class="nav-link" href="#insights"><i data-lucide="sparkles"></i><span>Insights</span></a>
+        <a class="nav-link" href="#base-dados"><i data-lucide="database"></i><span>Base de Dados</span></a>
+        <button class="nav-link nav-button" data-open-modal="settingsModal"><i data-lucide="settings-2"></i><span>Configurações</span></button>
+        <a class="nav-link" href="#ajuda"><i data-lucide="circle-help"></i><span>Ajuda</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="privacy-mini"><i data-lucide="shield-check"></i><span>Processamento 100% local</span></div>
+        <small>Sem backend ou envio dos dados SAP.</small>
+      </div>
+    </aside>
+
+    <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+
+    <div class="content-shell">
+      <header class="topbar">
+        <div class="topbar-title">
+          <button id="openSidebar" class="icon-button mobile-only" aria-label="Abrir menu"><i data-lucide="menu"></i></button>
+          <div>
+            <div class="eyebrow">MCPSE ANALYTICS</div>
+            <h1>Controle de Materiais Orçados × Materiais Baixados — SAP</h1>
+            <p>Acompanhamento executivo de projetos, reservas, baixas e desempenho de materiais</p>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <div class="clock-card" aria-live="polite">
+            <i data-lucide="clock-3"></i>
+            <div><strong id="clockTime">--:--:--</strong><span id="clockDate">Carregando horário local…</span></div>
+          </div>
+          <button class="icon-button" id="themeToggle" aria-label="Alternar tema"><i data-lucide="moon"></i></button>
+        </div>
+      </header>
+
+      <main id="conteudo">
+        <section id="visao-geral" class="hero-section section-anchor">
+          <div class="hero-copy">
+            <span class="hero-badge"><span class="live-dot"></span><span id="sourceBadgeText">Carregando base inicial</span></span>
+            <h2>Materiais sob controle.<br><span>Decisões com evidência.</span></h2>
+            <p>Compare orçamento e baixa, identifique pendências, trate inconsistências e priorize projetos em um painel único.</p>
+            <div class="hero-actions">
+              <button class="button button-primary" id="importButton"><i data-lucide="file-up"></i>Importar Nova Base SAP</button>
+              <button class="button button-secondary" id="exportMainButton"><i data-lucide="download"></i>Exportar dados filtrados</button>
+            </div>
+          </div>
+          <div class="hero-status">
+            <div class="status-orbit">
+              <div class="status-orbit-inner">
+                <span>Realização geral</span>
+                <strong id="heroPercent">0,00%</strong>
+                <small id="heroBalance">Calculando saldo…</small>
+              </div>
+            </div>
+            <div class="status-legend">
+              <span><i class="dot planned"></i>Orçado</span>
+              <span><i class="dot downloaded"></i>Baixado</span>
+              <span><i class="dot pending"></i>Pendente</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="meta-strip" id="base-dados">
+          <div><i data-lucide="database-zap"></i><span>Fonte exibida</span><strong id="metaSource">—</strong></div>
+          <div><i data-lucide="file-spreadsheet"></i><span>Arquivo</span><strong id="metaFile">—</strong></div>
+          <div><i data-lucide="calendar-clock"></i><span>Extração SAP</span><strong id="metaExtraction">—</strong></div>
+          <div><i data-lucide="refresh-cw"></i><span>Última importação</span><strong id="metaImport">—</strong></div>
+          <div><i data-lucide="list-tree"></i><span>Aba / registros</span><strong id="metaRows">—</strong></div>
+        </section>
+
+        <section class="privacy-banner">
+          <i data-lucide="shield-check"></i>
+          <div><strong>Privacidade preservada</strong><span>Os arquivos importados são processados somente neste navegador e não são enviados para servidores externos.</span></div>
+        </section>
+
+        <section class="filter-panel" aria-labelledby="filterTitle">
+          <div class="section-header">
+            <div><span class="section-kicker">CONSULTA DINÂMICA</span><h2 id="filterTitle">Filtros da análise</h2></div>
+            <div class="section-actions">
+              <span class="filter-count" id="activeFilterCount">0 filtros ativos</span>
+              <button class="button button-ghost" id="clearFiltersButton"><i data-lucide="filter-x"></i>Limpar</button>
+              <button class="button button-primary" id="applyFiltersButton"><i data-lucide="sliders-horizontal"></i>Aplicar filtros</button>
+            </div>
+          </div>
+          <div class="global-search">
+            <i data-lucide="search"></i>
+            <label class="sr-only" for="globalSearch">Buscar em todos os campos</label>
+            <input id="globalSearch" type="search" placeholder="Buscar projeto, material, contrato, reserva, movimento, centro ou depósito…">
+            <kbd>Ctrl K</kbd>
+          </div>
+          <div class="filter-grid">
+            <label>Projeto<select id="filterProject"><option value="">Todos</option></select></label>
+            <label>Contrato<select id="filterContract"><option value="">Todos</option></select></label>
+            <label>Status<select id="filterStatus"><option value="">Todos</option></select></label>
+            <label>Material<select id="filterMaterial"><option value="">Todos</option></select></label>
+            <label>Cód. movimento<select id="filterMovement"><option value="">Todos</option></select></label>
+            <label>Reserva<select id="filterReservation"><option value="">Todos</option></select></label>
+            <label>Centro<select id="filterCenter"><option value="">Todos</option></select></label>
+            <label>Depósito<select id="filterDeposit"><option value="">Todos</option></select></label>
+            <label>Unidade<select id="filterUnit"><option value="">Todas</option></select></label>
+            <label>Condição<select id="filterCondition"><option value="">Todas</option><option value="sem_contrato">Sem contrato</option><option value="com_contrato">Com contrato</option><option value="negativo">Quantidade negativa</option><option value="inconsistente">Dados inconsistentes</option><option value="abaixo_25">Baixa abaixo de 25%</option><option value="abaixo_50">Baixa abaixo de 50%</option><option value="entre_50_80">Baixa entre 50% e 80%</option><option value="acima_80">Baixa acima de 80%</option><option value="igual_100">Baixa igual a 100%</option><option value="acima_100">Baixa acima de 100%</option></select></label>
+            <label>Data inicial<input id="filterDateStart" type="date"></label>
+            <label>Data final<input id="filterDateEnd" type="date"></label>
+          </div>
+          <div id="filterChips" class="filter-chips" aria-live="polite"></div>
+        </section>
+
+        <section class="section-block" aria-labelledby="kpiTitle">
+          <div class="section-header">
+            <div><span class="section-kicker">RESUMO EXECUTIVO</span><h2 id="kpiTitle">Indicadores principais</h2></div>
+            <button class="button button-ghost" id="refreshButton"><i data-lucide="refresh-cw"></i>Atualizar visualização</button>
+          </div>
+          <div id="kpiGrid" class="kpi-grid skeleton-container" aria-live="polite"></div>
+        </section>
+
+        <section id="projetos" class="section-block section-anchor" aria-labelledby="projectChartsTitle">
+          <div class="section-header">
+            <div><span class="section-kicker">DESEMPENHO POR PROJETO</span><h2 id="projectChartsTitle">Orçamento, baixa e avanço</h2></div>
+            <div class="inline-controls">
+              <label>Ranking<select id="projectChartLimit"><option>10</option><option selected>15</option><option>20</option><option>30</option><option value="all">Todos</option></select></label>
+              <label>Ordenar por<select id="projectChartSort"><option value="planned">Maior orçado</option><option value="downloaded">Maior baixado</option><option value="pending">Maior saldo</option><option value="percent_desc">Maior percentual</option><option value="percent_asc">Menor percentual</option></select></label>
+            </div>
+          </div>
+          <div class="chart-grid">
+            <article class="chart-card chart-wide">
+              <div class="chart-card-header"><div><h3>Materiais orçados × baixados por projeto</h3><p>Comparação absoluta com saldo pendente</p></div><div class="chart-tools"><button data-chart-expand="projectsComparison" aria-label="Ampliar gráfico"><i data-lucide="maximize-2"></i></button><button data-chart-download="projectsComparison" aria-label="Baixar gráfico em PNG"><i data-lucide="image-down"></i></button></div></div>
+              <div class="chart-wrap tall"><canvas id="projectsComparison" aria-label="Gráfico de materiais orçados e baixados por projeto"></canvas></div>
+              <p id="projectsComparisonSummary" class="chart-summary"></p>
+            </article>
+            <article class="chart-card chart-wide">
+              <div class="chart-card-header"><div><h3>Percentual baixado × não baixado</h3><p>Composição elegível em barras empilhadas de 100%</p></div><div class="chart-tools"><button data-chart-expand="percentStacked" aria-label="Ampliar gráfico"><i data-lucide="maximize-2"></i></button><button data-chart-download="percentStacked" aria-label="Baixar gráfico em PNG"><i data-lucide="image-down"></i></button></div></div>
+              <div class="chart-wrap tall"><canvas id="percentStacked" aria-label="Gráfico percentual baixado e não baixado"></canvas></div>
+              <p id="percentStackedSummary" class="chart-summary"></p>
+            </article>
+            <article class="chart-card">
+              <div class="chart-card-header"><div><h3>15 menores percentuais de baixa</h3><p>Projetos que exigem maior atenção</p></div><div class="chart-tools"><button data-chart-expand="lowestProjects" aria-label="Ampliar gráfico"><i data-lucide="maximize-2"></i></button><button data-chart-download="lowestProjects" aria-label="Baixar gráfico em PNG"><i data-lucide="image-down"></i></button></div></div>
+              <div class="chart-wrap"><canvas id="lowestProjects" aria-label="Gráfico dos menores percentuais"></canvas></div>
+              <p id="lowestProjectsSummary" class="chart-summary"></p>
+            </article>
+            <article class="chart-card">
+              <div class="chart-card-header"><div><h3>Distribuição por status</h3><p>Clique em um segmento para filtrar</p></div><div class="chart-tools"><button data-chart-expand="statusDistribution" aria-label="Ampliar gráfico"><i data-lucide="maximize-2"></i></button><button data-chart-download="statusDistribution" aria-label="Baixar gráfico em PNG"><i data-lucide="image-down"></i></button></div></div>
+              <div class="chart-wrap"><canvas id="statusDistribution" aria-label="Gráfico de distribuição por status"></canvas></div>
+              <p id="statusDistributionSummary" class="chart-summary"></p>
+            </article>
+          </div>
+        </section>
+
+        <section id="movimentos" class="section-block section-anchor" aria-labelledby="movementTitle">
+          <div class="section-header"><div><span class="section-kicker">MOVIMENTOS E CONTRATOS</span><h2 id="movementTitle">Rastreabilidade operacional</h2></div></div>
+          <div class="chart-grid">
+            <article class="chart-card">
+              <div class="chart-card-header"><div><h3>Realização por código de movimento</h3><p>Volume, registros e percentual</p></div><div class="chart-tools"><button data-chart-expand="movementsPerformance" aria-label="Ampliar gráfico"><i data-lucide="maximize-2"></i></button><button data-chart-download="movementsPerformance" aria-label="Baixar gráfico"><i data-lucide="image-down"></i></button></div></div>
+              <div class="chart-wrap"><canvas id="movementsPerformance" aria-label="Desempenho por código de movimento"></canvas></div>
+              <p id="movementsPerformanceSummary" class="chart-summary"></p>
+            </article>
+            <article id="contratos" class="chart-card section-anchor">
+              <div class="chart-card-header"><div><h3>Contratos por desempenho</h3><p>Comparação incluindo registros sem contrato</p></div><div class="chart-tools"><button data-chart-expand="contractsPerformance" aria-label="Ampliar gráfico"><i data-lucide="maximize-2"></i></button><button data-chart-download="contractsPerformance" aria-label="Baixar gráfico"><i data-lucide="image-down"></i></button></div></div>
+              <div class="chart-wrap"><canvas id="contractsPerformance" aria-label="Desempenho por contrato"></canvas></div>
+              <p id="contractsPerformanceSummary" class="chart-summary"></p>
+            </article>
+          </div>
+        </section>
+
+        <section id="materiais" class="section-block section-anchor" aria-labelledby="materialsTitle">
+          <div class="section-header"><div><span class="section-kicker">RANKING DE MATERIAIS</span><h2 id="materialsTitle">Principais volumes da carteira</h2></div></div>
+          <div class="chart-grid chart-grid-three">
+            <article class="chart-card">
+              <div class="chart-card-header"><div><h3>15 principais materiais orçados</h3><p>Ranking por quantidade planejada</p></div><div class="chart-tools"><button data-chart-expand="materialsPlanned" aria-label="Ampliar gráfico"><i data-lucide="maximize-2"></i></button><button data-chart-download="materialsPlanned" aria-label="Baixar gráfico"><i data-lucide="image-down"></i></button></div></div>
+              <div class="chart-wrap"><canvas id="materialsPlanned" aria-label="Materiais mais orçados"></canvas></div>
+              <p id="materialsPlannedSummary" class="chart-summary"></p>
+            </article>
+            <article id="baixas" class="chart-card section-anchor">
+              <div class="chart-card-header"><div><h3>15 principais materiais baixados</h3><p>Ranking por quantidade realizada</p></div><div class="chart-tools"><button data-chart-expand="materialsDownloaded" aria-label="Ampliar gráfico"><i data-lucide="maximize-2"></i></button><button data-chart-download="materialsDownloaded" aria-label="Baixar gráfico"><i data-lucide="image-down"></i></button></div></div>
+              <div class="chart-wrap"><canvas id="materialsDownloaded" aria-label="Materiais mais baixados"></canvas></div>
+              <p id="materialsDownloadedSummary" class="chart-summary"></p>
+            </article>
+            <article class="chart-card">
+              <div class="chart-card-header"><div><h3>15 maiores saldos pendentes</h3><p>Prioridade por diferença entre orçamento e baixa</p></div><div class="chart-tools"><button data-chart-expand="materialsPending" aria-label="Ampliar gráfico"><i data-lucide="maximize-2"></i></button><button data-chart-download="materialsPending" aria-label="Baixar gráfico"><i data-lucide="image-down"></i></button></div></div>
+              <div class="chart-wrap"><canvas id="materialsPending" aria-label="Materiais com maior saldo pendente"></canvas></div>
+              <p id="materialsPendingSummary" class="chart-summary"></p>
+            </article>
+          </div>
+        </section>
+
+        <section id="reservas" class="section-block section-anchor" aria-labelledby="temporalTitle">
+          <div class="section-header"><div><span class="section-kicker">EVOLUÇÃO TEMPORAL</span><h2 id="temporalTitle">Necessidades e baixas ao longo do tempo</h2></div></div>
+          <article class="chart-card">
+            <div class="chart-card-header"><div><h3>Evolução temporal das quantidades</h3><p>Orçado, baixado, saldo acumulado e percentual acumulado</p></div><div class="chart-tools"><button data-chart-expand="temporalEvolution" aria-label="Ampliar gráfico"><i data-lucide="maximize-2"></i></button><button data-chart-download="temporalEvolution" aria-label="Baixar gráfico"><i data-lucide="image-down"></i></button></div></div>
+            <div class="chart-wrap tall"><canvas id="temporalEvolution" aria-label="Evolução temporal das baixas"></canvas></div>
+            <p id="temporalEvolutionSummary" class="chart-summary"></p>
+          </article>
+        </section>
+
+        <section id="inconsistencias" class="section-block section-anchor" aria-labelledby="issuesTitle">
+          <div class="section-header">
+            <div><span class="section-kicker">QUALIDADE DA BASE</span><h2 id="issuesTitle">Painel de inconsistências</h2></div>
+            <button class="button button-ghost" id="exportIssuesButton"><i data-lucide="file-warning"></i>Exportar inconsistências</button>
+          </div>
+          <p class="section-intro">Clique em um card para aplicar a ocorrência como filtro na análise.</p>
+          <div id="issuesGrid" class="issues-grid"></div>
+        </section>
+
+        <section id="insights" class="section-block section-anchor" aria-labelledby="insightsTitle">
+          <div class="section-header"><div><span class="section-kicker">ANÁLISE AUTOMÁTICA</span><h2 id="insightsTitle">Insights para tomada de decisão</h2></div></div>
+          <div id="insightsGrid" class="insights-grid" aria-live="polite"></div>
+        </section>
+
+        <section class="section-block" aria-labelledby="tableTitle">
+          <div class="section-header">
+            <div><span class="section-kicker">CONSULTA CONSOLIDADA</span><h2 id="tableTitle">Projetos analisados</h2></div>
+            <div class="section-actions export-menu-wrap">
+              <button class="button button-secondary" id="exportMenuButton"><i data-lucide="download"></i>Exportar<i data-lucide="chevron-down"></i></button>
+              <div id="exportMenu" class="export-menu" hidden>
+                <button data-export="csv">Dados filtrados em CSV</button>
+                <button data-export="json">Dados filtrados em JSON</button>
+                <button data-export="projects">Resumo dos projetos em CSV</button>
+                <button data-export="materials">Detalhamento dos materiais em CSV</button>
+                <button data-export="print">Relatório executivo para impressão</button>
+              </div>
+            </div>
+          </div>
+          <div class="table-toolbar">
+            <label>Linhas por página<select id="pageSize"><option>10</option><option selected>25</option><option>50</option><option>100</option><option>250</option><option>500</option></select></label>
+            <span id="tableRecordSummary">0 projetos encontrados</span>
+          </div>
+          <div class="table-wrap">
+            <table id="projectsTable">
+              <thead>
+                <tr>
+                  <th><button data-sort="project">Projeto<i data-lucide="arrow-up-down"></i></button></th>
+                  <th><button data-sort="contract">Contrato<i data-lucide="arrow-up-down"></i></button></th>
+                  <th><button data-sort="materials">Materiais<i data-lucide="arrow-up-down"></i></button></th>
+                  <th><button data-sort="records">Registros<i data-lucide="arrow-up-down"></i></button></th>
+                  <th><button data-sort="planned">Orçado<i data-lucide="arrow-up-down"></i></button></th>
+                  <th><button data-sort="downloaded">Baixado<i data-lucide="arrow-up-down"></i></button></th>
+                  <th><button data-sort="pending">Não baixado<i data-lucide="arrow-up-down"></i></button></th>
+                  <th><button data-sort="difference">Diferença<i data-lucide="arrow-up-down"></i></button></th>
+                  <th><button data-sort="percent">% baixa<i data-lucide="arrow-up-down"></i></button></th>
+                  <th>Reservas</th>
+                  <th>Mov. predominante</th>
+                  <th>Última data</th>
+                  <th>Status</th>
+                  <th>Inconsistência</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="projectsTableBody"></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <button id="prevPage" class="icon-button" aria-label="Página anterior"><i data-lucide="chevron-left"></i></button>
+            <div id="pageButtons" class="page-buttons"></div>
+            <button id="nextPage" class="icon-button" aria-label="Próxima página"><i data-lucide="chevron-right"></i></button>
+          </div>
+        </section>
+
+        <section id="ajuda" class="help-section section-anchor">
+          <div><span class="section-kicker">ATUALIZAÇÃO SIMPLES</span><h2>Pronto para receber uma nova extração SAP</h2><p>Importe Excel, CSV ou JSON; revise o mapeamento automático; escolha uma ou várias abas e atualize todos os indicadores em poucos passos.</p></div>
+          <div class="help-actions">
+            <button class="button button-primary" id="importButtonBottom"><i data-lucide="file-up"></i>Importar base</button>
+            <button class="button button-secondary" id="downloadTemplateButton" type="button"><i data-lucide="sheet"></i>Baixar modelo de planilha</button>
+            <a class="button button-ghost" href="docs/manual-utilizacao.md" target="_blank" rel="noopener"><i data-lucide="book-open-text"></i>Abrir manual</a>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <span>MCPSE Analytics | Engenharia e Controle de Materiais</span>
+        <span id="footerDataStatus">Base em carregamento</span>
+      </footer>
+    </div>
+  </div>
+
+  <input id="fileInput" type="file" accept=".xlsx,.xls,.xlsm,.csv,.json" hidden>
+
+  <div id="detailsModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="detailsModalTitle" hidden>
+    <div class="modal-dialog modal-large">
+      <div class="modal-header"><div><span class="section-kicker">DETALHAMENTO</span><h2 id="detailsModalTitle">Materiais do projeto</h2></div><button class="icon-button" data-close-modal="detailsModal" aria-label="Fechar"><i data-lucide="x"></i></button></div>
+      <div id="detailsSummary" class="details-summary"></div>
+      <div class="table-wrap details-table-wrap">
+        <table>
+          <thead><tr><th>Material</th><th>Descrição</th><th>Un.</th><th>Orçado</th><th>Baixado</th><th>Saldo</th><th>%</th><th>Reserva</th><th>Mov.</th><th>Data</th><th>Centro</th><th>Dep.</th><th>Doc. SAP</th><th>Item</th><th>Validação</th></tr></thead>
+          <tbody id="detailsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="importModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="importModalTitle" hidden>
+    <div class="modal-dialog modal-large">
+      <div class="modal-header"><div><span class="section-kicker">IMPORTAÇÃO LOCAL</span><h2 id="importModalTitle">Configurar nova base</h2><p id="importFileSummary"></p></div><button class="icon-button" data-close-modal="importModal" aria-label="Fechar"><i data-lucide="x"></i></button></div>
+      <div class="import-grid">
+        <section><h3>1. Selecione as abas</h3><p>Marque uma ou várias abas para consolidação.</p><div id="sheetSelector" class="sheet-selector"></div></section>
+        <section><h3>2. Revise o mapeamento</h3><p>O sistema identifica aliases automaticamente. Ajuste os campos se necessário.</p><div id="mappingGrid" class="mapping-grid"></div></section>
+      </div>
+      <div class="modal-footer"><button class="button button-ghost" data-close-modal="importModal">Cancelar</button><button class="button button-primary" id="confirmImportButton"><i data-lucide="combine"></i>Consolidar e atualizar</button></div>
+    </div>
+  </div>
+
+  <div id="settingsModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle" hidden>
+    <div class="modal-dialog">
+      <div class="modal-header"><div><span class="section-kicker">CONFIGURAÇÕES</span><h2 id="settingsModalTitle">Faixas de classificação</h2></div><button class="icon-button" data-close-modal="settingsModal" aria-label="Fechar"><i data-lucide="x"></i></button></div>
+      <div class="settings-grid">
+        <label>Limite da baixa crítica (%)<input id="thresholdCritical" type="number" min="1" max="49" step="1"></label>
+        <label>Limite da baixa realização (%)<input id="thresholdLow" type="number" min="2" max="79" step="1"></label>
+        <label>Limite da realização parcial (%)<input id="thresholdPartial" type="number" min="50" max="99" step="1"></label>
+        <label>Limite próximo da conclusão (%)<input id="thresholdNear" type="number" min="80" max="99.99" step="0.01"></label>
+      </div>
+      <p class="settings-note">Concluído permanece igual a 100%; valores acima de 100% são classificados como excesso.</p>
+      <div class="modal-footer"><button class="button button-ghost" id="resetSettingsButton">Restaurar padrão</button><button class="button button-primary" id="saveSettingsButton">Salvar configurações</button></div>
+    </div>
+  </div>
+
+  <div id="chartModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="chartModalTitle" hidden>
+    <div class="modal-dialog chart-modal-dialog">
+      <div class="modal-header"><h2 id="chartModalTitle">Gráfico ampliado</h2><button class="icon-button" data-close-modal="chartModal" aria-label="Fechar"><i data-lucide="x"></i></button></div>
+      <div class="chart-modal-body"><canvas id="expandedChartCanvas"></canvas></div>
+    </div>
+  </div>
+
+  <div id="progressOverlay" class="progress-overlay" hidden>
+    <div class="progress-dialog">
+      <div class="progress-icon"><i data-lucide="database-zap"></i></div>
+      <h2>Processando a base</h2>
+      <p id="progressStep">Preparando arquivo…</p>
+      <div class="progress-track"><span id="progressBar" style="width:0%"></span></div>
+      <strong id="progressPercent">0%</strong>
+    </div>
+  </div>
+
+  <div id="toastRegion" class="toast-region" role="status" aria-live="polite"></div>
+
+  <noscript>
+    <div class="noscript">Este dashboard precisa de JavaScript habilitado para processar e visualizar os dados.</div>
+  </noscript>
+
+  <script src="data/base-embed.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
