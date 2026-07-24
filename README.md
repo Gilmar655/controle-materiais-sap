@@ -13,7 +13,7 @@ A carga inicial foi gerada a partir da aba `Materiais` do arquivo `10_projetos_M
 - 10.942,374 unidades baixadas;
 - 50,183% de realização geral.
 
-Os dados iniciais são carregados de `data/base-inicial.json`. O arquivo `data/base-embed.js` funciona como contingência para que o painel também possa abrir diretamente pelo `index.html`, sem servidor local.
+Os dados iniciais são carregados pelos arquivos `data/base-embed.js` e `data/base-chunk-*.js`. A base foi dividida em partes menores para publicação confiável no GitHub Pages, sem remover registros.
 
 ## Funcionalidades
 
@@ -47,8 +47,8 @@ controle-materiais-sap/
 │   ├── background-pattern.svg
 │   └── vendor/
 ├── data/
-│   ├── base-inicial.json
 │   ├── base-embed.js
+│   ├── base-chunk-01.js … base-chunk-04.js
 │   ├── dicionario-campos.csv
 │   └── resumo-validacao.json
 ├── docs/
@@ -97,13 +97,14 @@ Também são reconhecidos contrato, descrição do projeto, descrição do mater
 
 ## Atualizar a base inicial
 
-Execute o extrator informando o novo arquivo:
+Execute o extrator informando o novo arquivo e depois gere as partes para web:
 
 ```bash
 python tools/extract_base.py caminho/para/nova_base.xlsx
+node tools/build_web_chunks.mjs
 ```
 
-O arquivo precisa ter uma aba chamada `Materiais` com os cabeçalhos mapeados pelo script. O processo atualiza `base-inicial.json`, a contingência `base-embed.js` e o resumo de validação.
+O arquivo precisa ter uma aba chamada `Materiais` com os cabeçalhos mapeados pelo script. O primeiro comando atualiza `base-inicial.json` e o resumo de validação; o segundo recria a carga web dividida.
 
 ## Publicação no GitHub Pages
 
