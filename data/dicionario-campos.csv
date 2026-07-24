@@ -1,0 +1,17 @@
+﻿Campo canônico;Nome sugerido;Descrição;Aliases reconhecidos
+projeto;Projeto;Identificador do projeto ou Elemento PEP;"Definição do projeto; Projeto; Elemento PEP; PEP"
+descricaoProjeto;Descrição do Projeto;Nome ou descrição do projeto;"Descrição do Projeto; Nome Projeto"
+contrato;Contrato;Número ou referência do contrato associado;"Contrato; Número Contrato; Contrato SAP"
+codigoMaterial;Código do Material;Código SAP do material;"Material; Código Material; Cod Material"
+descricaoMaterial;Descrição do Material;Texto breve ou descrição do material;"Descrição; Texto breve material"
+unidadeMedida;Unidade de Medida;Unidade utilizada na quantidade;"Unidade; UM; Unidade de Medida"
+quantidadeOrcada;Quantidade Orçada;Quantidade planejada/orçada;"Qtd Planej; Qtd Planejada; Quantidade Orçada; Planejado"
+quantidadeBaixada;Quantidade Baixada;Quantidade realizada/baixada;"Qtd Real; Qtd Realizada; Quantidade Baixada; Realizado"
+reserva;Reserva;Número da reserva SAP;"Reserva; Número Reserva"
+codigoMovimento;Código do Movimento;Código do movimento SAP;"Mov; Movimento; Código Movimento"
+tipoMovimento;Tipo de Movimento;Operação ou tipo de movimento;"Oper; Tipo Movimento"
+dataMovimento;Data do Movimento;Data da necessidade, reserva ou lançamento;"Data da Necessidade; Data Movimento; Data Lançamento"
+centro;Centro;Centro SAP;Centro
+deposito;Depósito;Depósito SAP;"Dep; Depósito"
+documentoSap;Documento SAP;Documento ou diagrama SAP;"Diagrama; Documento SAP"
+itemSap;Item SAP;Item do documento/reserva;"Item; Item SAP"
